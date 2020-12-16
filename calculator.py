@@ -1,15 +1,31 @@
 import tkinter as tk
+from tkinter import messagebox
 
 # Функция ввода цифр в поле ввода
 
 x = True
 
 
+def decor(func):
+    def dec(*args, **kwargs):
+        entry_field['state'] = tk.NORMAL
+        func(*args, **kwargs)
+        entry_field['state'] = tk.DISABLED
+    return dec
+
+
+@decor
 def add_digit(digit):
     global x
     value = entry_field.get()
     if x:
-        if digit == '.' and value.count('.') == 1:
+        if digit == '.' and value.count('.') == 1 and ('/' in value or '*' in value or '+' in value or '-' in value):
+            entry_field.delete(0, tk.END)
+            entry_field.insert(0, value + str(digit))
+        elif digit == '.' and value.count('.') == 1:
+            entry_field.delete(0, tk.END)
+            entry_field.insert(0, value)
+        elif digit == '.' and value.count('.') == 2:
             entry_field.delete(0, tk.END)
             entry_field.insert(0, value)
         else:
@@ -25,6 +41,7 @@ def add_digit(digit):
         x = True
 
 
+@decor
 def add_operation(operation):
     global x
     value = entry_field.get()
@@ -34,7 +51,6 @@ def add_operation(operation):
         elif '/' in value or '*' in value or '+' in value or '-' in value:
             calculate()
             value = entry_field.get()
-
         entry_field.delete(0, tk.END)
         entry_field.insert(0, value + operation)
     else:
@@ -52,16 +68,24 @@ def make_operation_button(operation):
                      command=lambda: add_operation(operation))
 
 
+@decor
 def calculate():
     value = entry_field.get()
     if value[-1] in '/*+-':
         value = value + value[:-1]
 
     entry_field.delete(0, tk.END)
-    y = str(eval(value))
-    if y[-2::] == '.0':
-        y = y.rstrip('0').rstrip('.')
-    entry_field.insert(0, y)
+    try:
+        y = str(eval(value))
+        if y[-2::] == '.0':
+            y = y.rstrip('0').rstrip('.')
+        entry_field.insert(0, y)
+    except (NameError, SyntaxError):
+        messagebox.showinfo('Внимание', 'Можно вводить только цифры!')
+        entry_field.insert(0, 0)
+    except ZeroDivisionError:
+        messagebox.showinfo('Внимание', 'Нельзя делить на 0!')
+        entry_field.insert(0, 0)
 
 
 def calculate_button():
@@ -70,6 +94,7 @@ def calculate_button():
     x = False
 
 
+@decor
 def clear_entry_field():
     entry_field.delete(0, tk.END)
     entry_field.insert(0, '0')
@@ -77,6 +102,18 @@ def clear_entry_field():
 
 def make_calc_button(operation):
     return tk.Button(text=operation, bg='#4285f4', font='arial', fg='white', bd=2, command=lambda: calculate_button())
+
+
+def press_key(event):
+    if event.char.isdigit():
+        add_digit(event.char)
+    elif event.char in '/*+-.':
+        add_operation(event.char)
+    elif event.char == '\r':
+        calculate_button()
+    elif event.char == '\x1b':
+        clear_entry_field()
+
 
 
 win = tk.Tk()
@@ -107,9 +144,12 @@ win.config(bg='#ffffff', relief='raised')
 # Название окна
 win.title('Калькулятор')
 
+win.bind('<Key>', press_key)
+
 # Поле ввода
 entry_field = tk.Entry(master=win, font='arial', width=15, justify=tk.RIGHT, borderwidth=5)
 entry_field.insert(0, '0')
+entry_field['state'] = tk.DISABLED
 entry_field.grid(row=0, column=0, columnspan=3, stick='we', pady=5, padx=5)
 
 # Кнопки с цифрами

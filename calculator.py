@@ -23,8 +23,7 @@ def add_digit(digit):
             entry_field.delete(0, tk.END)
             entry_field.insert(0, value + str(digit))
         elif digit == '.' and value.count('.') == 1:
-            entry_field.delete(0, tk.END)
-            entry_field.insert(0, value)
+            pass
         elif digit == '.' and value.count('.') == 2:
             entry_field.delete(0, tk.END)
             entry_field.insert(0, value)

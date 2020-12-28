@@ -1,31 +1,53 @@
 import tkinter as tk
 from tkinter import messagebox
 
+
 # Функция ввода цифр в поле ввода
 
 
 def add_digit(digit):
-    value_1 = entry_field.get('1.0', tk.END)
-    # value_2 = entry_field.get('1.0', tk.END)
-    # print(len(value_1))
+    value_1 = entry_field.get('1.0', '1.18')
+    value_3 = entry_field.get('3.0', '3.18')
+
     if len(value_1) > 18:
         pass
-    elif digit == '0' and value_1[0] == '0' and '.' not in value_1:
-        pass
-    elif digit == '.' and value_1 == '\n':
+    elif digit == '.' and len(value_1) == 0:
+        # Если ввести точку, то подставиться "0".
         entry_field.insert('1.0', '0.')
-    elif digit == '.' and value_1.count('.') == 1:
+
+    elif digit == '.' and value_1 == '-':
+        # Если ввести точку при уже введенном "-", то подставиться "-0."
+        entry_field.delete('1.0', '1.2')
+        entry_field.insert('1.0', '-0.')
+
+    elif digit == '0' and len(value_1) > 0 and value_1[0] == '0' and '.' not in value_1:
+        # Чтобы вначале ввода вводился только 1 ноль при вводе числа
         pass
+
+    elif digit == '.' and value_1.count('.') == 1:
+        # Чтобы вводилась только одна точка при вводе числа
+        pass
+
     else:
+        # Ввод цифр
         entry_field.insert(tk.E, digit)
 
 
+def add_operation(operation):
+    value_1 = entry_field.get('1.0', '1.18')
 
+    if (operation == '-' and len(value_1) == 0) or (operation == '-' and value_1 == '-'):
+        entry_field.delete('1.0', tk.END)
+        entry_field.insert('1.0', '-')
 
+    elif (operation in '/*+' and value_1 == '-') or (operation in '/*+' and len(value_1) == 0):
+        pass
 
-
-
-
+    else:
+        entry_field.delete('1.0', tk.END)
+        entry_field.insert('1.0', value_1 + '\n')
+        entry_field.delete('2.0', '2.18')
+        entry_field.insert('2.0', ' ' + operation + '\n')
 
 
 def clear_entry_field():
@@ -41,10 +63,8 @@ def make_operation_button(operation):
                      command=lambda: add_operation(operation))
 
 
-
 def make_calc_button(operation):
     return tk.Button(text=operation, bg='#4285f4', font='arial', fg='white', bd=2, command=lambda: calculate_button())
-
 
 
 win = tk.Tk()
@@ -76,7 +96,7 @@ win.config(bg='#ffffff', relief='raised')
 win.title('Калькулятор')
 
 # Поле ввода
-entry_field = tk.Text(master=win, font='arial', width=15, height=3, borderwidth=5)
+entry_field = tk.Text(master=win, font='arial', width=15, height=5, borderwidth=5)
 # entry_field.insert('1.0', '0')
 # entry_field['state'] = tk.DISABLED
 entry_field.grid(row=0, column=0, columnspan=3, stick='we', pady=5, padx=5)
@@ -99,8 +119,9 @@ make_operation_button('-').grid(row=5, column=4, stick='wens', padx=5, pady=5)
 tk.Button(text='.', bg='#f1f3f4', font='arial', bd=2, command=lambda: add_digit('.')).grid(row=5, column=1,
                                                                                            stick='wens', padx=5, pady=5)
 make_calc_button('=').grid(row=5, column=2, stick='wens', padx=5, pady=5)
-tk.Button(text='0', bg='#f1f3f4', font='arial', bd=2, command=lambda: add_digit('0')).grid(row=5, column=0, stick='wens',
-                                                                                         padx=5, pady=5)
+tk.Button(text='0', bg='#f1f3f4', font='arial', bd=2, command=lambda: add_digit('0')).grid(row=5, column=0,
+                                                                                           stick='wens',
+                                                                                           padx=5, pady=5)
 
 make_digit_button('1').grid(row=2, column=0, stick='wens', padx=5, pady=5)
 make_digit_button('2').grid(row=2, column=1, stick='wens', padx=5, pady=5)
